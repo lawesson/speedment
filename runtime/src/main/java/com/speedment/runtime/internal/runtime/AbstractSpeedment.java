@@ -34,7 +34,7 @@ import com.speedment.runtime.internal.component.PasswordComponentImpl;
 import com.speedment.runtime.internal.component.PrimaryKeyFactoryComponentImpl;
 import com.speedment.runtime.internal.component.ProjectComponentImpl;
 import com.speedment.runtime.internal.component.ResultSetMapperComponentImpl;
-import com.speedment.runtime.internal.config.dbms.StandardDbmsTypes;
+import com.speedment.runtime.internal.config.dbms.StandardDbmsTypesImpl;
 import com.speedment.runtime.manager.Manager;
 
 import java.util.Optional;
@@ -43,7 +43,7 @@ import java.util.Optional;
  * An abstract base implementation of the {@link Speedment} interface.
  * 
  * @author Emil Forslund
- * @since  2.4.0
+ * @since  3.0.0
  */
 @IncludeInjectable({
     ConnectionPoolComponentImpl.class,
@@ -56,7 +56,7 @@ import java.util.Optional;
     PrimaryKeyFactoryComponentImpl.class,
     ProjectComponentImpl.class,
     ResultSetMapperComponentImpl.class,
-    StandardDbmsTypes.class
+    StandardDbmsTypesImpl.class
 })
 public abstract class AbstractSpeedment implements Speedment {
     

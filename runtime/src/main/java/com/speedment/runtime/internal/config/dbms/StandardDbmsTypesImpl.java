@@ -19,6 +19,7 @@ package com.speedment.runtime.internal.config.dbms;
 import com.speedment.common.injector.annotation.IncludeInjectable;
 import com.speedment.common.injector.annotation.Inject;
 import com.speedment.runtime.config.parameter.DbmsType;
+import com.speedment.runtime.db.StandardDbmsTypes;
 
 import java.util.stream.Stream;
 
@@ -32,16 +33,18 @@ import java.util.stream.Stream;
     MariaDbDbmsType.class,
     PostgresDbmsType.class
 })
-public final class StandardDbmsTypes {
+public final class StandardDbmsTypesImpl implements StandardDbmsTypes {
     
     private @Inject MySqlDbmsType mysql;
     private @Inject MariaDbDbmsType mariadb;
     private @Inject PostgresDbmsType postgresql;
     
+    @Override
     public Stream<DbmsType> stream() {
         return Stream.of(mysql, mariadb, postgresql);
     }
 
+    @Override
     public DbmsType defaultType() {
         return mysql; 
     }

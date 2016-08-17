@@ -88,9 +88,15 @@
         
         <dependency>
             <groupId>com.speedment.common</groupId>
+            <artifactId>dagger</artifactId>
+            <version>${dagger.version}</version>
+        </dependency>
+        
+<!--        <dependency>
+            <groupId>com.speedment.common</groupId>
             <artifactId>injector</artifactId>
             <version>${injector.version}</version>
-        </dependency>
+        </dependency>-->
         
         <dependency>
             <groupId>com.speedment.common</groupId>

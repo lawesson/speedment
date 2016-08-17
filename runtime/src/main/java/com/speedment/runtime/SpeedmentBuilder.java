@@ -16,7 +16,7 @@
  */
 package com.speedment.runtime;
 
-import com.speedment.common.injector.Injector;
+import com.speedment.common.dagger.ObjectGraph;
 import com.speedment.runtime.annotation.Api;
 import com.speedment.runtime.component.Component;
 import com.speedment.runtime.config.Document;
@@ -64,7 +64,7 @@ public interface SpeedmentBuilder<APP extends Speedment, BUILDER extends Speedme
      * @param consumer  the consumer to apply
      * @return          this instance
      */
-    <C extends Document & HasEnabled> BUILDER with(Class<C> type, String name, BiConsumer<Injector, C> consumer);
+    <C extends Document & HasEnabled> BUILDER with(Class<C> type, String name, BiConsumer<ObjectGraph, C> consumer);
     
     /**
      * Configures a parameter for all {@link Document} of a certain class. The
@@ -90,7 +90,7 @@ public interface SpeedmentBuilder<APP extends Speedment, BUILDER extends Speedme
      * @param consumer  the consumer to apply
      * @return          this instance
      */
-    <C extends Document & HasEnabled> BUILDER with(Class<C> type, BiConsumer<Injector, C> consumer);
+    <C extends Document & HasEnabled> BUILDER with(Class<C> type, BiConsumer<ObjectGraph, C> consumer);
     
     /**
      * Sets a config parameter that will be set automatically in all instances

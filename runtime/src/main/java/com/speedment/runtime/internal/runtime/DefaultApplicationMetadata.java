@@ -16,13 +16,12 @@
  */
 package com.speedment.runtime.internal.runtime;
 
-import com.speedment.common.injector.Injector;
-import com.speedment.common.injector.annotation.Config;
 import com.speedment.runtime.ApplicationMetadata;
 import com.speedment.runtime.config.Project;
 import com.speedment.runtime.internal.util.document.DocumentTranscoder;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import java.io.File;
 
 /**
  * The default implementation of the {@link ApplicationMetadata} interface.
@@ -32,28 +31,22 @@ import java.io.File;
  * {@link Injector}.
  * 
  * @author  Emil Forslund
- * @since   2.4.0
+ * @since   3.0.0
  */
 public final class DefaultApplicationMetadata implements ApplicationMetadata {
     
-    public final static String METADATA_LOCATION = "metadata_location";
+    private final Path configLocation;
     
-    /**
-     * Specified the location of the .json-file from which the metadata
-     * is loaded.
-     */
-    private @Config(
-        name=METADATA_LOCATION, 
-        value="src/main/json/speedment.json"
-    ) File metadataLocation;
+    public DefaultApplicationMetadata() {
+        this.configLocation = Paths.get("src", "main", "json", "speedment.json");
+    }
     
-    /**
-     * Should only be instantiated by the {@link Injector}.
-     */
-    private DefaultApplicationMetadata() {}
+    public DefaultApplicationMetadata(String configLocation) {
+        this.configLocation = Paths.get(configLocation);
+    }
 
     @Override
     public Project makeProject() {
-        return DocumentTranscoder.load(metadataLocation.toPath());
+        return DocumentTranscoder.load(configLocation);
     }
 }

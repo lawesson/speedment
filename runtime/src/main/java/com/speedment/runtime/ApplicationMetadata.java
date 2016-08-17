@@ -28,7 +28,7 @@ import com.speedment.runtime.config.Project;
  */
 @Api(version = "3.0")
 public interface ApplicationMetadata {
-
+    
     /**
      * Transforms the metadata into a {@link Project} document.
      * 
