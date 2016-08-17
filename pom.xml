@@ -296,6 +296,7 @@
                                 <exclude>src/test/resources/**</exclude>
                                 <exclude>src/main/resources/**</exclude>
                                 <exclude>nbproject/**</exclude>
+                                <exclude>src/main/java/com/speedment/common/dagger/**</exclude>
                             </excludes>
                         </configuration>
                         <executions>
