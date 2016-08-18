@@ -16,8 +16,7 @@
  */
 package com.speedment.runtime.internal.config.dbms;
 
-import com.speedment.common.injector.annotation.IncludeInjectable;
-import com.speedment.common.injector.annotation.Inject;
+import com.speedment.common.dagger.Provides;
 import com.speedment.runtime.config.Dbms;
 import com.speedment.runtime.db.ConnectionUrlGenerator;
 import com.speedment.runtime.db.DatabaseNamingConvention;
@@ -28,16 +27,15 @@ import com.speedment.runtime.internal.db.AbstractDatabaseNamingConvention;
 import com.speedment.runtime.internal.db.postgresql.PostgresqlDbmsMetadataHandler;
 import com.speedment.runtime.internal.db.postgresql.PostgresqlDbmsOperationHandler;
 import com.speedment.runtime.internal.manager.sql.PostgresSpeedmentPredicateView;
-
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-
-import static com.speedment.runtime.db.metadata.TypeInfoMetaData.of;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toSet;
 import com.speedment.runtime.field.predicate.FieldPredicateView;
+import javax.inject.Inject;
+import javax.inject.Named;
 import static com.speedment.runtime.db.metadata.TypeInfoMetaData.of;
 
 /**
@@ -47,11 +45,9 @@ import static com.speedment.runtime.db.metadata.TypeInfoMetaData.of;
  * @author  Per Minborg
  * @author  Emil Forslund
  */
-@IncludeInjectable({
-    PostgresqlDbmsMetadataHandler.class,
-    PostgresqlDbmsOperationHandler.class
-})
 public final class PostgresDbmsType extends AbstractDbmsType {
+    
+    public final static String INJECT_NAME = "PostgreSQL";
 
     private final PostgresNamingConvention namingConvention;
     private final PostgresConnectionUrlGenerator connectionUrlGenerator;
@@ -59,7 +55,7 @@ public final class PostgresDbmsType extends AbstractDbmsType {
     private @Inject PostgresqlDbmsMetadataHandler metadataHandler;
     private @Inject PostgresqlDbmsOperationHandler operationHandler;
     
-    private PostgresDbmsType() {
+    private @Inject @Named(INJECT_NAME) PostgresDbmsType() {
         namingConvention       = new PostgresNamingConvention();
         connectionUrlGenerator = new PostgresConnectionUrlGenerator();
     }
@@ -89,35 +85,30 @@ public final class PostgresDbmsType extends AbstractDbmsType {
         return "org.postgresql.Driver";
     }
 
-    @Override
+    @Override @Provides @Named(INJECT_NAME)
     public DatabaseNamingConvention getDatabaseNamingConvention() {
         return namingConvention;
     }
 
-    @Override
+    @Override @Provides @Named(INJECT_NAME)
     public DbmsMetadataHandler getMetadataHandler() {
         return metadataHandler;
     }
 
-    @Override
+    @Override @Provides @Named(INJECT_NAME)
     public DbmsOperationHandler getOperationHandler() {
         return operationHandler;
     }
 
-    @Override
+    @Override @Provides @Named(INJECT_NAME)
     public ConnectionUrlGenerator getConnectionUrlGenerator() {
         return connectionUrlGenerator;
     }
 
-    @Override
+    @Override @Provides @Named(INJECT_NAME)
     public FieldPredicateView getSpeedmentPredicateView() {
         return new PostgresSpeedmentPredicateView(namingConvention);
     }
-
-//    @Override
-//    public String getResultSetTableSchema() {
-//        return "TABLE_SCHEMA";
-//    }
     
     @Override
     public String getInitialQuery() {
@@ -134,14 +125,17 @@ public final class PostgresDbmsType extends AbstractDbmsType {
 
     private final static class PostgresNamingConvention extends AbstractDatabaseNamingConvention {
 
-        private final static String ENCLOSER = "\"",
-            QUOTE = "'";
+        private final static String 
+            ENCLOSER = "\"",
+            QUOTE    = "'";
 
         private final static Set<String> EXCLUDE_SET = Stream.of(
             "pg_catalog",
             "information_schema"
         ).collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
 
+        private PostgresNamingConvention() {}
+        
         @Override
         public Set<String> getSchemaExcludeSet() {
             return EXCLUDE_SET;
@@ -170,6 +164,8 @@ public final class PostgresDbmsType extends AbstractDbmsType {
 
     private final static class PostgresConnectionUrlGenerator implements ConnectionUrlGenerator {
 
+        private PostgresConnectionUrlGenerator() {}
+        
         @Override
         public String from(Dbms dbms) {
             final StringBuilder result = new StringBuilder()

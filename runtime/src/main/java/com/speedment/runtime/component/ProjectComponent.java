@@ -16,7 +16,6 @@
  */
 package com.speedment.runtime.component;
 
-import com.speedment.common.injector.annotation.InjectorKey;
 import com.speedment.runtime.annotation.Api;
 import com.speedment.runtime.config.Project;
 
@@ -28,7 +27,6 @@ import com.speedment.runtime.config.Project;
  * @since   2.0.0
  */
 @Api(version = "3.0")
-@InjectorKey(ProjectComponent.class)
 public interface ProjectComponent extends Component {
 
     @Override

@@ -16,12 +16,8 @@
  */
 package com.speedment.runtime.internal.manager.sql;
 
-import com.speedment.common.injector.annotation.ExecuteBefore;
-import com.speedment.common.injector.annotation.Inject;
-import com.speedment.common.injector.annotation.WithState;
 import com.speedment.common.mapstream.MapStream;
 import com.speedment.runtime.component.DbmsHandlerComponent;
-import com.speedment.runtime.component.ManagerComponent;
 import com.speedment.runtime.component.ProjectComponent;
 import com.speedment.runtime.component.resultset.ResultSetMapperComponent;
 import com.speedment.runtime.config.Column;
@@ -63,8 +59,6 @@ import java.util.stream.BaseStream;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.speedment.common.injector.State.INITIALIZED;
-import static com.speedment.common.injector.State.RESOLVED;
 import com.speedment.common.lazy.specialized.LazyString;
 import static com.speedment.runtime.internal.util.document.DocumentDbUtil.*;
 import static com.speedment.runtime.internal.util.document.DocumentUtil.Name.DATABASE_NAME;
@@ -75,6 +69,7 @@ import static com.speedment.runtime.util.OptionalUtil.unwrap;
 import static com.speedment.runtime.util.NullUtil.requireNonNulls;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
+import javax.inject.Inject;
 
 /**
  *
@@ -92,30 +87,22 @@ public abstract class AbstractSqlManager<ENTITY> extends AbstractManager<ENTITY>
 
     private SqlFunction<ResultSet, ENTITY> entityMapper;
 
-    private @Inject DbmsHandlerComponent dbmsHandlerComponent;
-    private @Inject ResultSetMapperComponent resultSetMapperComponent;
-    private @Inject ProjectComponent projectComponent;
+    @Inject DbmsHandlerComponent dbmsHandlerComponent;
+    @Inject ResultSetMapperComponent resultSetMapperComponent;
+    @Inject ProjectComponent projectComponent;
 
-    protected AbstractSqlManager() {
+    protected AbstractSqlManager(ProjectComponent projectComponent) {
         this.sqlColumnList     = LazyString.create();
         this.sqlTableReference = LazyString.create();
         this.sqlSelect         = LazyString.create();
         this.fieldMap          = new HashMap<>();
 
         this.hasPrimaryKeyColumns = primaryKeyFields().findAny().isPresent();
-    }
-
-    @ExecuteBefore(INITIALIZED)
-    void addToManager(
-            @WithState(INITIALIZED) ManagerComponent managers,
-            @WithState(INITIALIZED) ProjectComponent projectComponent) {
         
-        requireNonNull(projectComponent); // Must be initalized for this to execute.
-        managers.put(this);
+        createFieldTraitMap(projectComponent);
     }
 
-    @ExecuteBefore(RESOLVED)
-    void createFieldTraitMap(@WithState(INITIALIZED) ProjectComponent projectComponent) {
+    private void createFieldTraitMap(ProjectComponent projectComponent) {
         final Project project = projectComponent.getProject();
         final Table thisTable = getTable();
 

@@ -16,9 +16,7 @@
  */
 package com.speedment.runtime.internal.config.dbms;
 
-import com.speedment.common.injector.annotation.ExecuteBefore;
-import com.speedment.common.injector.annotation.WithState;
-import com.speedment.runtime.component.DbmsHandlerComponent;
+import com.speedment.common.dagger.Provides;
 import com.speedment.runtime.config.parameter.DbmsType;
 import com.speedment.runtime.db.DatabaseNamingConvention;
 import com.speedment.runtime.db.metadata.TypeInfoMetaData;
@@ -28,9 +26,6 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.speedment.common.injector.State.CREATED;
-import static com.speedment.common.injector.State.INITIALIZED;
-
 /**
  *
  * @author  Emil Forslund
@@ -38,9 +33,9 @@ import static com.speedment.common.injector.State.INITIALIZED;
  */
 public abstract class AbstractDbmsType implements DbmsType {
 
-    @ExecuteBefore(INITIALIZED)
-    void install(@WithState(CREATED) DbmsHandlerComponent component) {
-        component.install(this);
+    @Provides(type = Provides.Type.SET)
+    DbmsType provideDbmsType() {
+        return this;
     }
     
     @Override

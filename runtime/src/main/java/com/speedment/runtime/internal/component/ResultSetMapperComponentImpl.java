@@ -33,14 +33,18 @@ import java.util.stream.Stream;
 
 import static com.speedment.runtime.util.NullUtil.requireNonNulls;
 import static java.util.Objects.requireNonNull;
+import javax.inject.Singleton;
 
-public final class ResultSetMapperComponentImpl extends InternalOpenSourceComponent implements ResultSetMapperComponent {
+@Singleton
+public final class ResultSetMapperComponentImpl 
+extends InternalOpenSourceComponent 
+implements ResultSetMapperComponent {
 
     private final Map<Class<?>, ResultSetMapping<?>> map;
     private final Map<DbmsType, Map<Class<?>, ResultSetMapping<?>>> dbmsTypeMap;
 
     public ResultSetMapperComponentImpl() {
-        map = newConcurrentMap();
+        map         = newConcurrentMap();
         dbmsTypeMap = newConcurrentMap();
         StandardJavaTypeMapping.stream().forEach(this::put);
     }

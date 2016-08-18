@@ -16,7 +16,6 @@
  */
 package com.speedment.runtime.component.connectionpool;
 
-import com.speedment.common.injector.annotation.InjectorKey;
 import com.speedment.runtime.annotation.Api;
 import com.speedment.runtime.component.Component;
 import com.speedment.runtime.config.Dbms;
@@ -31,7 +30,6 @@ import java.sql.Connection;
  * @since   2.1.0
  */
 @Api(version = "3.0")
-@InjectorKey(ConnectionPoolComponent.class)
 public interface ConnectionPoolComponent extends Component {
 
     @Override

@@ -16,7 +16,6 @@
  */
 package com.speedment.runtime.internal.db;
 
-import com.speedment.common.injector.annotation.Inject;
 import com.speedment.common.logger.Logger;
 import com.speedment.common.logger.LoggerManager;
 import com.speedment.runtime.component.DbmsHandlerComponent;
@@ -54,6 +53,7 @@ import static com.speedment.runtime.util.NullUtil.requireNonNulls;
 import java.util.Collection;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import javax.inject.Inject;
 
 /**
  *

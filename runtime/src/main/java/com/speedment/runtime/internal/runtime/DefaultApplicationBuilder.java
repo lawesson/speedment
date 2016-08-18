@@ -16,13 +16,19 @@
  */
 package com.speedment.runtime.internal.runtime;
 
-import com.speedment.common.injector.Injector;
+import com.speedment.common.dagger.ObjectGraph;
 import com.speedment.runtime.ApplicationMetadata;
 import com.speedment.runtime.Speedment;
 
 /**
- *
- * @author Emil Forslund
+ * The default application builder is an implementation of the 
+ * {@link ApplicationBuilder}-interface that uses the standard 
+ * {@link SpeedmentImpl}-class as the application and the metadata supplied in 
+ * the constructor. This can be useeful when constructing tests where the 
+ * metadata is created programatically.
+ * 
+ * @author  Emil Forslund
+ * @since   3.0.0
  */
 public final class DefaultApplicationBuilder extends
     AbstractApplicationBuilder<Speedment, DefaultApplicationBuilder> {
@@ -31,15 +37,17 @@ public final class DefaultApplicationBuilder extends
         super(SpeedmentImpl.class, metadataClass);
     }
     
-    public DefaultApplicationBuilder(Injector.Builder injector) {
-        super(injector);
+    public DefaultApplicationBuilder(ObjectGraph graph) {
+        super(graph);
     }
 
     @Override
-    protected Speedment build(Injector injector) {
-        return injector.getOrThrow(Speedment.class);
+    protected Speedment build(ObjectGraph graph) {
+        return graph.get(Speedment.class);
     }
 
     @Override
-    protected void printWelcomeMessage(Injector injector) {}
+    protected void printWelcomeMessage(ObjectGraph graph) {
+        // Do not print any welcome message when using the default builder.
+    }
 }

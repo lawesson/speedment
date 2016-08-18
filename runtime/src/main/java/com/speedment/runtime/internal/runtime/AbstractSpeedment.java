@@ -16,28 +16,16 @@
  */
 package com.speedment.runtime.internal.runtime;
 
-import com.speedment.common.injector.Injector;
-import com.speedment.common.injector.annotation.IncludeInjectable;
-import com.speedment.common.injector.annotation.Inject;
+import com.speedment.common.dagger.ObjectGraph;
 import com.speedment.runtime.Speedment;
 import com.speedment.runtime.component.ManagerComponent;
 import com.speedment.runtime.component.ProjectComponent;
 import com.speedment.runtime.config.Project;
 import com.speedment.runtime.exception.SpeedmentException;
-import com.speedment.runtime.internal.component.ConnectionPoolComponentImpl;
-import com.speedment.runtime.internal.component.DbmsHandlerComponentImpl;
-import com.speedment.runtime.internal.component.EntityManagerImpl;
-import com.speedment.runtime.internal.component.InfoComponentImpl;
-import com.speedment.runtime.internal.component.ManagerComponentImpl;
-import com.speedment.runtime.internal.component.NativeStreamSupplierComponentImpl;
-import com.speedment.runtime.internal.component.PasswordComponentImpl;
-import com.speedment.runtime.internal.component.PrimaryKeyFactoryComponentImpl;
-import com.speedment.runtime.internal.component.ProjectComponentImpl;
-import com.speedment.runtime.internal.component.ResultSetMapperComponentImpl;
-import com.speedment.runtime.internal.config.dbms.StandardDbmsTypesImpl;
 import com.speedment.runtime.manager.Manager;
 
 import java.util.Optional;
+import javax.inject.Inject;
 
 /**
  * An abstract base implementation of the {@link Speedment} interface.
@@ -45,36 +33,28 @@ import java.util.Optional;
  * @author Emil Forslund
  * @since  3.0.0
  */
-@IncludeInjectable({
-    ConnectionPoolComponentImpl.class,
-    DbmsHandlerComponentImpl.class,
-    EntityManagerImpl.class,
-    InfoComponentImpl.class,
-    ManagerComponentImpl.class,
-    NativeStreamSupplierComponentImpl.class,
-    PasswordComponentImpl.class,
-    PrimaryKeyFactoryComponentImpl.class,
-    ProjectComponentImpl.class,
-    ResultSetMapperComponentImpl.class,
-    StandardDbmsTypesImpl.class
-})
 public abstract class AbstractSpeedment implements Speedment {
     
-    private @Inject ProjectComponent projectComponent;
-    private @Inject ManagerComponent managerComponent;
-    private @Inject Injector injector;
+    @Inject ProjectComponent projectComponent;
+    @Inject ManagerComponent managerComponent;
+    @Inject ObjectGraph graph;
     
     protected AbstractSpeedment() {}
 
     @Override
     public <T> Optional<T> get(Class<T> type) {
-        return injector.get(type);
+        try {
+            return Optional.of(graph.get(type));
+        } catch (final IllegalArgumentException ex) {
+            // Ignore this exception as a temporary solution.
+            return Optional.empty();
+        }
     }
 
     @Override
     public <T> T getOrThrow(Class<T> componentClass) throws SpeedmentException {
         try {
-            return injector.getOrThrow(componentClass);
+            return graph.get(componentClass);
         } catch (final IllegalArgumentException ex) {
             throw new SpeedmentException(
                 "Specified component '" + componentClass.getSimpleName() + 
@@ -95,6 +75,7 @@ public abstract class AbstractSpeedment implements Speedment {
 
     @Override
     public void stop() {
-        injector.stop();
+        // Do nothing as of now. In the future, we might want to do something
+        // more advanced here to make sure all components are closed properly.
     }
 }

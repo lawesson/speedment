@@ -34,7 +34,7 @@ import java.nio.file.Paths;
  * @since   3.0.0
  */
 public final class DefaultApplicationMetadata implements ApplicationMetadata {
-    
+
     private final Path configLocation;
     
     public DefaultApplicationMetadata() {

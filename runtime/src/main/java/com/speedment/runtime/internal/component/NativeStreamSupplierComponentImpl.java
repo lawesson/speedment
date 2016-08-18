@@ -16,19 +16,23 @@
  */
 package com.speedment.runtime.internal.component;
 
-import com.speedment.common.injector.annotation.Inject;
 import com.speedment.runtime.component.ManagerComponent;
 import com.speedment.runtime.component.StreamSupplierComponent;
 import com.speedment.runtime.license.Software;
 import com.speedment.runtime.stream.StreamDecorator;
 
 import java.util.stream.Stream;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  *
  * @author Per Minborg
  */
-public class NativeStreamSupplierComponentImpl extends InternalOpenSourceComponent implements StreamSupplierComponent {
+@Singleton
+public class NativeStreamSupplierComponentImpl 
+extends InternalOpenSourceComponent 
+implements StreamSupplierComponent {
 
     private @Inject ManagerComponent managerComponent;
     

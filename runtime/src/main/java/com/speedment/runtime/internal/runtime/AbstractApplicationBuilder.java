@@ -16,14 +16,16 @@
  */
 package com.speedment.runtime.internal.runtime;
 
-import com.speedment.common.injector.Injector;
-import com.speedment.common.injector.exception.CyclicReferenceException;
+import com.speedment.common.dagger.ObjectGraph;
+import com.speedment.common.dagger.Provides;
 import com.speedment.common.logger.Logger;
 import com.speedment.common.logger.LoggerManager;
 import com.speedment.common.tuple.Tuple2;
 import com.speedment.common.tuple.Tuple3;
 import com.speedment.common.tuple.Tuples;
 import com.speedment.runtime.ApplicationMetadata;
+import com.speedment.runtime.ApplicationModule;
+import com.speedment.runtime.RuntimeModule;
 import com.speedment.runtime.Speedment;
 import com.speedment.runtime.SpeedmentBuilder;
 import com.speedment.runtime.SpeedmentVersion;
@@ -36,23 +38,21 @@ import com.speedment.runtime.config.Project;
 import com.speedment.runtime.config.Schema;
 import com.speedment.runtime.config.trait.HasEnabled;
 import com.speedment.runtime.config.trait.HasName;
-import com.speedment.runtime.exception.SpeedmentException;
 import com.speedment.runtime.internal.util.document.DocumentDbUtil;
 import com.speedment.runtime.manager.Manager;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
-
 import static com.speedment.runtime.SpeedmentVersion.getImplementationVendor;
 import static com.speedment.runtime.SpeedmentVersion.getSpecificationVersion;
+import com.speedment.runtime.component.ProjectComponent;
 import static com.speedment.runtime.internal.util.document.DocumentUtil.Name.DATABASE_NAME;
 import static com.speedment.runtime.internal.util.document.DocumentUtil.relativeName;
 import static com.speedment.runtime.util.NullUtil.requireNonNulls;
+import java.util.HashMap;
+import java.util.Map;
 import static java.util.Objects.requireNonNull;
+import javax.inject.Named;
 
 /**
  * This abstract class is implemented by classes that can build a 
@@ -61,9 +61,8 @@ import static java.util.Objects.requireNonNull;
  * @param <APP>      the type that is being built
  * @param <BUILDER>  the (self) type of the AbstractApplicationBuilder
  * 
- * @author  Per Minborg
  * @author  Emil Forslund
- * @since   2.0.0
+ * @since   3.0.0
  */
 public abstract class AbstractApplicationBuilder<
         APP extends Speedment,
@@ -72,9 +71,10 @@ public abstract class AbstractApplicationBuilder<
 
     private final static Logger LOGGER = LoggerManager.getLogger(AbstractApplicationBuilder.class);
 
-    private final List<Tuple3<Class<? extends Document>, String, BiConsumer<Injector, ? extends Document>>> withsNamed;
-    private final List<Tuple2<Class<? extends Document>, BiConsumer<Injector, ? extends Document>>> withsAll;
-    private final Injector.Builder injector;
+    private final List<Tuple3<Class<? extends Document>, String, BiConsumer<ObjectGraph, ? extends Document>>> withsNamed;
+    private final List<Tuple2<Class<? extends Document>, BiConsumer<ObjectGraph, ? extends Document>>> withsAll;
+    private final Map<String, String> parameters;
+    private final ObjectGraph graph;
 
     // TODO Investigate why these are not used.
     private boolean checkDatabaseConnectivity; 
@@ -84,16 +84,20 @@ public abstract class AbstractApplicationBuilder<
             Class<? extends APP> applicationImplClass, 
             Class<? extends ApplicationMetadata> metadataClass) {
         
-        this(Injector.builder()
-            .canInject(applicationImplClass)
-            .canInject(metadataClass)
-        );
+        this(ObjectGraph.create(
+            new RuntimeModule(),
+            new ApplicationModule<>(
+                applicationImplClass,
+                metadataClass
+            )
+        ));
     }
     
-    protected AbstractApplicationBuilder(Injector.Builder injector) {
-        this.injector   = requireNonNull(injector);
+    protected AbstractApplicationBuilder(ObjectGraph graph) {
+        this.graph      = requireNonNull(graph);
         this.withsNamed = new ArrayList<>();
         this.withsAll   = new ArrayList<>();
+        this.parameters = new HashMap<>();
     }
     
     protected final BUILDER self() {
@@ -103,14 +107,14 @@ public abstract class AbstractApplicationBuilder<
     }
 
     @Override
-    public <C extends Document & HasEnabled> BUILDER with(Class<C> type, String name, BiConsumer<Injector, C> consumer) {
+    public <C extends Document & HasEnabled> BUILDER with(Class<C> type, String name, BiConsumer<ObjectGraph, C> consumer) {
         requireNonNulls(type, name, consumer);
         withsNamed.add(Tuples.of(type, name, consumer));
         return self();
     }
 
     @Override
-    public <C extends Document & HasEnabled> BUILDER with(Class<C> type, BiConsumer<Injector, C> consumer) {
+    public <C extends Document & HasEnabled> BUILDER with(Class<C> type, BiConsumer<ObjectGraph, C> consumer) {
         requireNonNulls(type, consumer);
         withsAll.add(Tuples.of(type, consumer));
         return self();
@@ -118,21 +122,21 @@ public abstract class AbstractApplicationBuilder<
 
     @Override
     public BUILDER withParam(String key, String value) {
-        injector.withParam(key, value);
+        parameters.put(key, value);
         return self();
     }
 
     @Override
     public BUILDER withPassword(char[] password) {
         // password nullable
-        with(Dbms.class, (inj, dbms) -> inj.getOrThrow(PasswordComponent.class).put(dbms, password));
+        with(Dbms.class, (og, dbms) -> og.get(PasswordComponent.class).put(dbms, password));
         return self();
     }
 
     @Override
     public BUILDER withPassword(String dbmsName, char[] password) {
         // password nullable
-        with(Dbms.class, dbmsName, (inj, dbms) -> inj.getOrThrow(PasswordComponent.class).put(dbms, password));
+        with(Dbms.class, dbmsName, (og, dbms) -> og.get(PasswordComponent.class).put(dbms, password));
         return self();
     }
 
@@ -217,14 +221,16 @@ public abstract class AbstractApplicationBuilder<
 
     @Override
     public <C extends Component> BUILDER with(Class<C> componentImplType) {
-        withInjectable(injector, componentImplType, Component::getComponentClass);
-        return self();
+//        withInjectable(graph, componentImplType, Component::getComponentClass);
+//        return self();
+        throw new UnsupportedOperationException("Not implemented with dagger yet.");
     }
     
     @Override
     public <M extends Manager<?>> BUILDER withManager(Class<M> managerImplType) {
-        withInjectable(injector, managerImplType, M::getEntityClass);
-        return self();
+//        withInjectable(graph, managerImplType, M::getEntityClass);
+//        return self();
+        throw new UnsupportedOperationException("Not implemented with dagger yet.");
     }
 
     @Override
@@ -241,87 +247,80 @@ public abstract class AbstractApplicationBuilder<
     
     @Override
     public BUILDER withInjectable(Class<?> injectableClass) {
-        injector.canInject(injectableClass);
-        return self();
+        throw new UnsupportedOperationException("Not implemented with dagger yet.");
     }
 
     @Override
     public BUILDER withInjectable(String key, Class<?> injectableClass) {
-        injector.canInject(key, injectableClass);
-        return self();
+        throw new UnsupportedOperationException("Not implemented with dagger yet.");
     }
 
     @Override
     public final APP build() {
-        final Injector inj;
-        
-        try {
-            inj = injector.build();
-        } catch (final InstantiationException | CyclicReferenceException ex) {
-            throw new SpeedmentException("Error in dependency injection.", ex);
-        }
-        
-        loadAndSetProject(inj);
-        return build(inj);
+        final ObjectGraph complete = this.graph.plus(new ParameterModule(parameters));
+        loadAndSetProject(complete);
+        return build(complete);
     }
     
     /**
      * Builds the application using the specified injector.
      * 
-     * @param injector  the injector to use
-     * @return          the built instance.
+     * @param graph  the object graph to use
+     * @return       the built instance.
      */
-    protected abstract APP build(Injector injector);
+    protected abstract APP build(ObjectGraph graph);
 
     /**
      * Builds up the complete Project meta data tree.
      * 
-     * @param injector  the injector to use
+     * @param graph  the object graph to use
      */
-    protected void loadAndSetProject(Injector injector) {
-        final ApplicationMetadata meta = injector.getOrThrow(ApplicationMetadata.class);
-        final Project project = meta.makeProject();
+    protected void loadAndSetProject(ObjectGraph graph) {
+        final ProjectComponent holder  = graph.get(ProjectComponent.class);
+        final ApplicationMetadata meta = graph.get(ApplicationMetadata.class);
+        final Project project          = meta.makeProject();
 
         // Apply overidden item (if any) for all Documents of a given class
         withsAll.forEach(t2 -> {
             final Class<? extends Document> clazz = t2.get0();
             
             @SuppressWarnings("unchecked")
-            final BiConsumer<Injector, Document> consumer = 
-                (BiConsumer<Injector, Document>) t2.get1();
+            final BiConsumer<ObjectGraph, Document> consumer = 
+                (BiConsumer<ObjectGraph, Document>) t2.get1();
             
-            DocumentDbUtil.traverseOver(project)
-                .filter(clazz::isInstance)
-                .map(Document.class::cast)
-                .forEachOrdered(doc -> consumer.accept(injector, doc));
+            DocumentDbUtil.traverseOver(project, clazz)
+                .forEachOrdered(doc -> consumer.accept(graph, doc));
         });
 
-        // Apply a named overidden item (if any) for all Entities of a given class
+        // Apply a named overidden item (if any) for all Entities of a given 
+        // class
         withsNamed.forEach(t3 -> {
             final Class<? extends Document> clazz = t3.get0();
             final String name = t3.get1();
 
             @SuppressWarnings("unchecked")
-            final BiConsumer<Injector, Document> consumer = 
-                (BiConsumer<Injector, Document>) t3.get2();
+            final BiConsumer<ObjectGraph, Document> consumer = 
+                (BiConsumer<ObjectGraph, Document>) t3.get2();
 
-            DocumentDbUtil.traverseOver(project)
-                .filter(clazz::isInstance)
+            DocumentDbUtil.traverseOver(project, clazz)
                 .filter(HasName.class::isInstance)
                 .map(HasName.class::cast)
                 .filter(c -> name.equals(relativeName(c, Project.class, DATABASE_NAME)))
-                .forEachOrdered(doc -> consumer.accept(injector, doc));
+                .forEachOrdered(doc -> consumer.accept(graph, doc));
         });
+        
+        // Update the project in the component
+        holder.setProject(project);
     }
     
     /**
      * Prints a welcome message to the output channel.
      * 
-     * @param injector  the injector to use
+     * @param graph  the object graph to use
      */
-    protected void printWelcomeMessage(Injector injector) {
+    protected void printWelcomeMessage(ObjectGraph graph) {
         
-        final InfoComponent info = injector.getOrThrow(InfoComponent.class);
+        final InfoComponent info = graph.get(InfoComponent.class);
 
         try {
             final Package package_ = Runtime.class.getPackage();
@@ -355,23 +354,37 @@ public abstract class AbstractApplicationBuilder<
         }
     }
     
-    private static <T> void withInjectable(Injector.Builder injector, Class<T> injectableImplType, Function<T, Class<?>> keyExtractor) {
-        requireNonNull(injectableImplType);
+//    private static <T> void withInjectable(Injector.Builder injector, Class<T> injectableImplType, Function<T, Class<?>> keyExtractor) {
+//        requireNonNull(injectableImplType);
+//        
+//        final T injectable;
+//        try {
+//            final Constructor<T> constructor = injectableImplType.getDeclaredConstructor();
+//            constructor.setAccessible(true);
+//            injectable = constructor.newInstance();
+//        } catch (InstantiationException 
+//               | IllegalAccessException 
+//               | NoSuchMethodException 
+//               | InvocationTargetException ex) {
+//            
+//            throw new SpeedmentException(ex);
+//        }
+//        
+//        final Class<?> key = keyExtractor.apply(injectable);
+//        injector.canInject(key.getName(), injectableImplType);
+//    }
+    
+    private final static class ParameterModule {
         
-        final T injectable;
-        try {
-            final Constructor<T> constructor = injectableImplType.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            injectable = constructor.newInstance();
-        } catch (InstantiationException 
-               | IllegalAccessException 
-               | NoSuchMethodException 
-               | InvocationTargetException ex) {
-            
-            throw new SpeedmentException(ex);
+        private final Map<String, String> parameters;
+        
+        private ParameterModule(Map<String, String> parameters) {
+            this.parameters = requireNonNull(parameters);
         }
         
-        final Class<?> key = keyExtractor.apply(injectable);
-        injector.canInject(key.getName(), injectableImplType);
+        @Provides @Named("params")
+        public Map<String, String> provideParameters() {
+            return parameters;
+        }
     }
 }

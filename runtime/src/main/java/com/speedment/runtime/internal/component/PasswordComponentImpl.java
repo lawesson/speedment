@@ -24,11 +24,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
+import javax.inject.Singleton;
 
 /**
  *
  * @author Emil Forslund
  */
+@Singleton
 public final class PasswordComponentImpl extends InternalOpenSourceComponent implements PasswordComponent {
 
     private final transient Map<String, char[]> passwords;

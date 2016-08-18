@@ -42,6 +42,7 @@
         <module>tuple</module>
         <module>logger</module>
         <module>dagger</module>
+        <module>dagger-compiler</module>
         <module>mapstream</module>
         <module>codegen</module>
         <module>codegenxml</module>

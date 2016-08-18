@@ -16,23 +16,17 @@
  */
 package com.speedment.runtime.internal.config.dbms;
 
-import com.speedment.common.injector.annotation.IncludeInjectable;
-import com.speedment.common.injector.annotation.Inject;
 import com.speedment.runtime.config.parameter.DbmsType;
 import com.speedment.runtime.db.StandardDbmsTypes;
 
 import java.util.stream.Stream;
+import javax.inject.Inject;
 
 /**
  *
  * @author  Per Minborg
  * @author  Emil Forslund
  */
-@IncludeInjectable({
-    MySqlDbmsType.class,
-    MariaDbDbmsType.class,
-    PostgresDbmsType.class
-})
 public final class StandardDbmsTypesImpl implements StandardDbmsTypes {
     
     private @Inject MySqlDbmsType mysql;

@@ -16,7 +16,6 @@
  */
 package com.speedment.runtime.component;
 
-import com.speedment.common.injector.annotation.InjectorKey;
 import com.speedment.runtime.annotation.Api;
 
 /**
@@ -28,7 +27,6 @@ import com.speedment.runtime.annotation.Api;
  * @since   3.0.0
  */
 @Api(version = "3.0")
-@InjectorKey(InfoComponent.class)
 public interface InfoComponent extends Component {
     
     /**

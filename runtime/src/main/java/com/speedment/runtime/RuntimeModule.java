@@ -12,6 +12,7 @@ import com.speedment.runtime.component.ProjectComponent;
 import com.speedment.runtime.component.StreamSupplierComponent;
 import com.speedment.runtime.component.connectionpool.ConnectionPoolComponent;
 import com.speedment.runtime.component.resultset.ResultSetMapperComponent;
+import com.speedment.runtime.config.parameter.DbmsType;
 import com.speedment.runtime.db.StandardDbmsTypes;
 import com.speedment.runtime.internal.component.ConnectionPoolComponentImpl;
 import com.speedment.runtime.internal.component.DbmsHandlerComponentImpl;
@@ -24,6 +25,8 @@ import com.speedment.runtime.internal.component.PrimaryKeyFactoryComponentImpl;
 import com.speedment.runtime.internal.component.ProjectComponentImpl;
 import com.speedment.runtime.internal.component.ResultSetMapperComponentImpl;
 import com.speedment.runtime.internal.config.dbms.StandardDbmsTypesImpl;
+import com.speedment.runtime.manager.Manager;
+import java.util.Set;
 import javax.inject.Singleton;
 
 /**
@@ -33,17 +36,29 @@ import javax.inject.Singleton;
  * @author  Emil Forslund
  * @since   3.0.0
  */
-@Module
+@Module(injects = {
+    ConnectionPoolComponent.class,
+    DbmsHandlerComponent.class,
+    EntityManager.class,
+    InfoComponent.class,
+    ManagerComponent.class,
+    StreamSupplierComponent.class,
+    PasswordComponent.class,
+    PrimaryKeyFactoryComponent.class,
+    ProjectComponent.class,
+    ResultSetMapperComponent.class,
+    StandardDbmsTypes.class
+})
 public final class RuntimeModule {
-    
+
     @Provides @Singleton
     public ConnectionPoolComponent provideConnectionPoolComponent() {
         return new ConnectionPoolComponentImpl();
     }
     
     @Provides @Singleton
-    public DbmsHandlerComponent provideDbmsHandlerComponent() {
-        return new DbmsHandlerComponentImpl();
+    public DbmsHandlerComponent provideDbmsHandlerComponent(Set<DbmsType> dbmsTypes) {
+        return new DbmsHandlerComponentImpl(dbmsTypes);
     }
     
     @Provides @Singleton
@@ -57,8 +72,8 @@ public final class RuntimeModule {
     }
     
     @Provides @Singleton
-    public ManagerComponent provideManagerComponent() {
-        return new ManagerComponentImpl();
+    public ManagerComponent provideManagerComponent(Set<Manager<?>> managers) {
+        return new ManagerComponentImpl(managers);
     }
     
     @Provides @Singleton

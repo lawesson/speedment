@@ -16,6 +16,7 @@
  */
 package com.speedment.runtime.internal.component;
 
+import com.speedment.common.mapstream.MapStream;
 import com.speedment.runtime.component.ManagerComponent;
 import com.speedment.runtime.config.Table;
 import com.speedment.runtime.exception.SpeedmentException;
@@ -27,31 +28,40 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import java.util.Set;
+import javax.inject.Singleton;
 
 /**
  *
  * @author Emil Forslund
  */
-public final class ManagerComponentImpl extends InternalOpenSourceComponent implements ManagerComponent {
+@Singleton
+public final class ManagerComponentImpl 
+extends InternalOpenSourceComponent 
+implements ManagerComponent {
 
-    private final Map<Class<?>, Manager<?>> managersByEntity;
     private final Map<Table, Manager<?>> tableMap;
+    private final Map<Class<?>, Manager<?>> managersByEntity;
 
-    public ManagerComponentImpl() {
-        managersByEntity = new ConcurrentHashMap<>();
+    public ManagerComponentImpl(Set<Manager<?>> managers) { // Injected.
+        managersByEntity = mapByEntity(managers);
         tableMap         = new ConcurrentHashMap<>();
+    }
+    
+    private Map<Class<?>, Manager<?>> mapByEntity(Set<Manager<?>> managers) {
+        @SuppressWarnings("unchecked")
+        final Map<Class<?>, Manager<?>> result = 
+            (Map<Class<?>, Manager<?>>) MapStream.fromValues(
+                managers.stream(), 
+                m -> m.getEntityClass()
+            ).toConcurrentMap();
+        
+        return result;
     }
     
     @Override
     protected String getDescription() {
         return "Holds the manager instances used to communicate with various database tables.";
-    }
-
-    @Override
-    public <ENTITY> void put(Manager<ENTITY> manager) {
-        requireNonNull(manager);
-        managersByEntity.put(manager.getEntityClass(), manager);
-        tableMap.put(manager.getTable(), manager);
     }
 
     @Override

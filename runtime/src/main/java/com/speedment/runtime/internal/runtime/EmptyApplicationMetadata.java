@@ -16,12 +16,16 @@
  */
 package com.speedment.runtime.internal.runtime;
 
+import com.speedment.runtime.ApplicationMetadata;
 import java.util.Optional;
 
 /**
- *
+ * An implementation of the {@link ApplicationMetadata}-interface that describes 
+ * an empty project. This is typically used when a {@link Speedment}-instance is
+ * required but there is no project node.
+ * 
  * @author  Emil Forslund
- * @since   2.4.0
+ * @since   3.0.0
  */
 public final class EmptyApplicationMetadata extends AbstractApplicationMetadata {
 

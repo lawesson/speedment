@@ -16,28 +16,26 @@
  */
 package com.speedment.runtime.internal.component;
 
-import com.speedment.common.injector.annotation.ExecuteBefore;
-import com.speedment.common.injector.annotation.WithState;
-import com.speedment.runtime.ApplicationMetadata;
 import com.speedment.runtime.component.ProjectComponent;
 import com.speedment.runtime.config.Project;
-
-import static com.speedment.common.injector.State.INITIALIZED;
 import static java.util.Objects.requireNonNull;
+import javax.inject.Singleton;
 
-public final class ProjectComponentImpl extends InternalOpenSourceComponent implements ProjectComponent {
+/**
+ * 
+ * @author Emil Forslund
+ */
+@Singleton
+public final class ProjectComponentImpl 
+extends InternalOpenSourceComponent 
+implements ProjectComponent {
 
     private Project project;
-    
-    @ExecuteBefore(INITIALIZED)
-    void loadProjectFromMetadata(@WithState(INITIALIZED) ApplicationMetadata metadata) {
-        project = metadata.makeProject();
-    }
 
     @Override
     protected String getDescription() {
-        return "Holds a reference to the project node where all the project-specific " + 
-            "configuration data is stored.";
+        return "Holds a reference to the project node where all the " +
+            "project-specific configuration data is stored.";
     }
 
     @Override

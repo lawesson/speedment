@@ -16,7 +16,6 @@
  */
 package com.speedment.runtime.internal.component;
 
-import com.speedment.common.injector.annotation.Inject;
 import com.speedment.runtime.component.EntityManager;
 import com.speedment.runtime.component.ManagerComponent;
 import com.speedment.runtime.exception.SpeedmentException;
@@ -28,11 +27,14 @@ import java.util.stream.Stream;
 
 import static com.speedment.runtime.util.NullUtil.requireNonNulls;
 import static java.util.Objects.requireNonNull;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  *
  * @author Emil Forslund
  */
+@Singleton
 public final class EntityManagerImpl extends InternalOpenSourceComponent implements EntityManager {
 
     private @Inject ManagerComponent managerComponent;

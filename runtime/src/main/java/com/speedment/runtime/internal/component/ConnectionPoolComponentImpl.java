@@ -16,7 +16,6 @@
  */
 package com.speedment.runtime.internal.component;
 
-import com.speedment.common.injector.annotation.Inject;
 import com.speedment.common.logger.Logger;
 import com.speedment.common.logger.LoggerManager;
 import com.speedment.runtime.component.DbmsHandlerComponent;
@@ -42,12 +41,15 @@ import java.util.stream.Stream;
 
 import static com.speedment.runtime.util.OptionalUtil.unwrap;
 import static java.util.Objects.requireNonNull;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * A fully concurrent implementation of a connection pool.
  *
  * @author Per Minborg
  */
+@Singleton
 public class ConnectionPoolComponentImpl extends InternalOpenSourceComponent implements ConnectionPoolComponent {
 
     private final Logger logger = LoggerManager.getLogger(ConnectionPoolComponentImpl.class);

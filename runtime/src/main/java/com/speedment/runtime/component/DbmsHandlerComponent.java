@@ -16,7 +16,6 @@
  */
 package com.speedment.runtime.component;
 
-import com.speedment.common.injector.annotation.InjectorKey;
 import com.speedment.runtime.annotation.Api;
 import com.speedment.runtime.config.parameter.DbmsType;
 
@@ -31,20 +30,7 @@ import java.util.stream.Stream;
  * @since   2.0.0
  */
 @Api(version = "3.0")
-@InjectorKey(DbmsHandlerComponent.class)
 public interface DbmsHandlerComponent extends Component {
-
-    /**
-     * Installs a new {@link DbmsType} so that handlers can be located using the
-     * {@link #findByName(String)} method.
-     * <p>
-     * The type will be indexed by its name as returned by
-     * {@link DbmsType#getName()}. If multiple {@code DbmsTypes} share name,
-     * only the most recently installed will be saved.
-     *
-     * @param dbmsType the type to install
-     */
-    void install(DbmsType dbmsType);
 
     /**
      * Returns a stream of all {@link DbmsType DbmsTypes} that has been

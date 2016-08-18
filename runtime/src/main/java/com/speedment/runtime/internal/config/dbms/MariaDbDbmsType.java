@@ -16,8 +16,7 @@
  */
 package com.speedment.runtime.internal.config.dbms;
 
-import com.speedment.common.injector.annotation.IncludeInjectable;
-import com.speedment.common.injector.annotation.Inject;
+import com.speedment.common.dagger.Provides;
 import com.speedment.runtime.config.Dbms;
 import com.speedment.runtime.db.ConnectionUrlGenerator;
 import com.speedment.runtime.db.DatabaseNamingConvention;
@@ -35,17 +34,17 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toSet;
 import com.speedment.runtime.field.predicate.FieldPredicateView;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  *
  * @author  Per Minborg
  * @author  Emil Forslund
  */
-@IncludeInjectable({
-    MySqlDbmsMetadataHandler.class,
-    MySqlDbmsOperationHandler.class
-})
 public final class MariaDbDbmsType extends AbstractDbmsType {
+    
+    public final static String INJECT_NAME = "MariaDB";
     
     private final MariaDbNamingConvention namingConvention;
     private final MariaDbConnectionUrlGenerator connectionUrlGenerator;
@@ -53,7 +52,7 @@ public final class MariaDbDbmsType extends AbstractDbmsType {
     private @Inject MySqlDbmsMetadataHandler metadataHandler;
     private @Inject MySqlDbmsOperationHandler operationHandler;
     
-    private MariaDbDbmsType() {
+    private @Inject @Named(INJECT_NAME) MariaDbDbmsType() {
         namingConvention       = new MariaDbNamingConvention();
         connectionUrlGenerator = new MariaDbConnectionUrlGenerator();
     }
@@ -83,27 +82,27 @@ public final class MariaDbDbmsType extends AbstractDbmsType {
         return "org.mariadb.jdbc.Driver";
     }
 
-    @Override
+    @Override @Provides @Named(INJECT_NAME)
     public DatabaseNamingConvention getDatabaseNamingConvention() {
         return namingConvention;
     }
 
-    @Override
+    @Override @Provides @Named(INJECT_NAME)
     public DbmsMetadataHandler getMetadataHandler() {
         return metadataHandler;
     }
 
-    @Override
+    @Override @Provides @Named(INJECT_NAME)
     public DbmsOperationHandler getOperationHandler() {
         return operationHandler;
     }
 
-    @Override
+    @Override @Provides @Named(INJECT_NAME)
     public ConnectionUrlGenerator getConnectionUrlGenerator() {
         return connectionUrlGenerator;
     }
 
-    @Override
+    @Override @Provides @Named(INJECT_NAME)
     public FieldPredicateView getSpeedmentPredicateView() {
         return new MySqlSpeedmentPredicateView(namingConvention);
     }
@@ -122,6 +121,8 @@ public final class MariaDbDbmsType extends AbstractDbmsType {
         private final static Set<String> EXCLUDE_SET = Stream.of(
             "information_schema"
         ).collect(collectingAndThen(toSet(), Collections::unmodifiableSet));
+        
+        private MariaDbNamingConvention() {}
         
         @Override
         public Set<String> getSchemaExcludeSet() {
@@ -151,6 +152,8 @@ public final class MariaDbDbmsType extends AbstractDbmsType {
     
     private final static class MariaDbConnectionUrlGenerator implements ConnectionUrlGenerator {
 
+        private MariaDbConnectionUrlGenerator() {}
+        
         @Override
         public String from(Dbms dbms) {
             final StringBuilder result = new StringBuilder()

@@ -16,7 +16,6 @@
  */
 package com.speedment.runtime.component;
 
-import com.speedment.common.injector.annotation.InjectorKey;
 import com.speedment.runtime.annotation.Api;
 import com.speedment.runtime.config.Table;
 import com.speedment.runtime.exception.SpeedmentException;
@@ -33,24 +32,12 @@ import java.util.stream.Stream;
  * @since   2.0.0
  */
 @Api(version = "3.0")
-@InjectorKey(ManagerComponent.class)
 public interface ManagerComponent extends Component {
 
     @Override
     default Class<ManagerComponent> getComponentClass() {
         return ManagerComponent.class;
     }
-
-    /**
-     * Puts (associates) a {@link Manager} implementation into the
-     * {@code ManagerComponent}. If a previous {@link Manager} was associated
-     * with an Entity class, table or interface, that association(s) is/are
-     * replaced.
-     *
-     * @param <E>      the entity interface type
-     * @param manager  to associate
-     */
-    <E> void put(Manager<E> manager);
 
     /**
      * Obtains and returns the currently associated {@link Manager}

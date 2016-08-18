@@ -17,12 +17,14 @@
 package com.speedment.runtime.internal.component;
 
 import com.speedment.runtime.component.InfoComponent;
+import javax.inject.Singleton;
 
 /**
  *
  * @author Emil Forslund
  * @since  3.0.0
  */
+@Singleton
 public final class InfoComponentImpl extends InternalOpenSourceComponent 
     implements InfoComponent {
 

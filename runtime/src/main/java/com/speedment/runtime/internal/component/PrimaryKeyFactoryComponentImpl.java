@@ -34,11 +34,13 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import javax.inject.Singleton;
 
 /**
  *
  * @author Per Minborg
  */
+@Singleton
 public final class PrimaryKeyFactoryComponentImpl extends InternalOpenSourceComponent implements PrimaryKeyFactoryComponent {
 
     @Override

@@ -16,37 +16,36 @@
  */
 package com.speedment.runtime.internal.manager;
 
-import com.speedment.common.injector.annotation.ExecuteBefore;
-import com.speedment.common.injector.annotation.Inject;
-import com.speedment.common.injector.annotation.WithState;
-import com.speedment.runtime.component.ManagerComponent;
+import com.speedment.common.dagger.Provides;
+import com.speedment.runtime.component.ProjectComponent;
 import com.speedment.runtime.component.StreamSupplierComponent;
 import com.speedment.runtime.manager.Manager;
 import com.speedment.runtime.stream.StreamDecorator;
-
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import static com.speedment.common.injector.State.INITIALIZED;
-import static com.speedment.common.injector.State.RESOLVED;
 import com.speedment.runtime.exception.SpeedmentException;
 import com.speedment.runtime.field.Field;
 import com.speedment.runtime.field.trait.HasComparableOperators;
+import static java.util.Objects.requireNonNull;
+import javax.inject.Inject;
 
 /**
  *
- * @author          Emil Forslund
  * @param <ENTITY>  entity type for this Manager
+ * 
+ * @author  Emil Forslund
+ * @since   2.0.0
  */
 public abstract class AbstractManager<ENTITY> implements Manager<ENTITY> {
 
-    private @Inject StreamSupplierComponent streamSupplierComponent;
+    @Inject StreamSupplierComponent streamSupplierComponent;
 
     protected AbstractManager() {}
     
-    @ExecuteBefore(RESOLVED)
-    void install(@WithState(INITIALIZED) ManagerComponent managerComponent) {
-        managerComponent.put(this);
+    @Provides(type = Provides.Type.SET)
+    Manager<ENTITY> provideManager(ProjectComponent projectComponent) {
+        requireNonNull(projectComponent); // Must be initalized for this to execute.
+        return this;
     }
 
     @Override

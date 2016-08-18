@@ -16,47 +16,45 @@
  */
 package com.speedment.runtime.internal.component;
 
-import com.speedment.common.injector.annotation.IncludeInjectable;
+import com.speedment.common.mapstream.MapStream;
 import com.speedment.runtime.component.DbmsHandlerComponent;
 import com.speedment.runtime.config.parameter.DbmsType;
-import com.speedment.runtime.internal.config.dbms.StandardDbmsTypesImpl;
 import com.speedment.runtime.license.Software;
-
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
-
 import static java.util.Objects.requireNonNull;
-import static java.util.Objects.requireNonNull;
+import java.util.Set;
+import javax.inject.Singleton;
 
 /**
  *
- * @author Per Minborg
+ * @author  Per Minborg
+ * @author  Emil Forslund
  */
-@IncludeInjectable(StandardDbmsTypesImpl.class)
-public final class DbmsHandlerComponentImpl extends InternalOpenSourceComponent implements DbmsHandlerComponent {
+@Singleton
+public final class DbmsHandlerComponentImpl 
+extends InternalOpenSourceComponent 
+implements DbmsHandlerComponent {
 
     private final Map<String, DbmsType> dbmsTypes;
 
-    public DbmsHandlerComponentImpl() {
-        this.dbmsTypes = new ConcurrentHashMap<>();
+    public DbmsHandlerComponentImpl(Set<DbmsType> dbmsTypes) {
+        this.dbmsTypes = MapStream.fromValues(
+            dbmsTypes.stream(), 
+            DbmsType::getName
+        ).toConcurrentMap();
     }
     
     @Override
     protected String getDescription() {
-        return "Holds references to the various database managers that is currently supported.";
+        return "Holds references to the various database managers that is " + 
+            "currently supported.";
     }
 
     @Override
     public Class<DbmsHandlerComponent> getComponentClass() {
         return DbmsHandlerComponent.class;
-    }
-
-    @Override
-    public void install(DbmsType dbmsType) {
-        requireNonNull(dbmsType);
-        dbmsTypes.put(dbmsType.getName(), dbmsType);
     }
 
     @Override

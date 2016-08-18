@@ -16,8 +16,6 @@
  */
 package com.speedment.runtime.internal.db;
 
-import com.speedment.common.injector.annotation.ExecuteBefore;
-import com.speedment.common.injector.annotation.Inject;
 import com.speedment.common.logger.Logger;
 import com.speedment.common.logger.LoggerManager;
 import com.speedment.runtime.component.DbmsHandlerComponent;
@@ -68,7 +66,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static com.speedment.common.injector.State.INITIALIZED;
 import com.speedment.runtime.config.mapper.primitive.PrimitiveTypeMapper;
 import static com.speedment.runtime.internal.db.AbstractDbmsOperationHandler.SHOW_METADATA;
 import static com.speedment.runtime.internal.util.CaseInsensitiveMaps.newCaseInsensitiveMap;
@@ -80,6 +77,7 @@ import java.util.stream.Stream;
 import static com.speedment.runtime.util.NullUtil.requireNonNulls;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
+import javax.inject.Inject;
 
 /**
  *
@@ -99,7 +97,7 @@ public abstract class AbstractDbmsMetadataHandler implements DbmsMetadataHandler
     
     protected AbstractDbmsMetadataHandler() {}
     
-    @ExecuteBefore(INITIALIZED)
+    @Inject
     final void createJavaTypeMap() {
         this.javaTypeMap = newJavaTypeMap();
     }

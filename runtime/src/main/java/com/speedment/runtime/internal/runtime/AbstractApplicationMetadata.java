@@ -27,9 +27,13 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *
+ * An abstract base implementation of the {@link ApplicationMetadata}-interface.
+ * If a metadata string can be produced by an implementing class using the 
+ * {@link #getMetadata()}-method, it will be used to produce a {@link Project} 
+ * instance.
+ * 
  * @author  Emil Forslund
- * @since   2.4.0
+ * @since   3.0.0
  */
 public abstract class AbstractApplicationMetadata implements ApplicationMetadata {
 
